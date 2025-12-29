@@ -208,6 +208,9 @@ export default function NewClaimPage() {
                     placeholder="Ex: 12"
                     className="bg-background"
                   />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    La note qui figure actuellement sur votre bulletin
+                  </p>
                 </div>
 
                 <div>
@@ -225,6 +228,9 @@ export default function NewClaimPage() {
                     placeholder="Ex: 15"
                     className="bg-background"
                   />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Indiquez la note que vous estimez mériter (ex: 15)
+                  </p>
                 </div>
               </div>
             </div>

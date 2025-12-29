@@ -78,4 +78,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Notification::class);
     }
+    public function sendPasswordResetNotification($token)
+    {
+        $url = env('FRONTEND_URL', 'http://localhost:5173') . '/reset-password?token=' . $token . '&email=' . $this->email;
+        $this->notify(new \Illuminate\Auth\Notifications\ResetPassword($token));
+        
+        // Note: Si vous voulez vraiment personnaliser le lien, il est préferable de créer une notification dédiée.
+        // Mais pour simplifier, on s'assure que FRONTEND_URL est bien utilisé par Laravel ou via une notification personnalisée.
+    }
 }

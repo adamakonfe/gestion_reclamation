@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Matiere;
 use App\Repositories\Interfaces\MatiereRepositoryInterface;
 use Illuminate\Http\Request;
 
@@ -16,8 +17,14 @@ class MatiereController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $user = $request->user();
+        
+        if ($request->has('my') && $user && $user->role->name === 'teacher') {
+            return response()->json($this->matiereRepository->getByEnseignant($user->id));
+        }
+
         return response()->json($this->matiereRepository->getAll());
     }
 
@@ -32,9 +39,17 @@ class MatiereController extends Controller
             'enseignant_id' => 'nullable|exists:users,id',
         ]);
 
-        $matiere = Matiere::create($request->all());
+        $data = $request->all();
+        $user = $request->user();
 
-        return response()->json($matiere, 201);
+        // Si c'est un enseignant qui ajoute, on lui assigne d'office la matière
+        if ($user->role->name === 'teacher') {
+            $data['enseignant_id'] = $user->id;
+        }
+
+        $matiere = Matiere::create($data);
+
+        return response()->json($matiere->load('filiere'), 201);
     }
 
     /**

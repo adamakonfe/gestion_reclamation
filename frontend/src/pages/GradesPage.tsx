@@ -70,6 +70,7 @@ export default function GradesPage() {
                                 <TableHead className="text-center">Note Actuelle</TableHead>
                                 <TableHead className="text-center">Note Demandée</TableHead>
                                 <TableHead className="text-center">Note Finale</TableHead>
+                                <TableHead>Objectif</TableHead>
                                 <TableHead>Date Validation</TableHead>
                                 <TableHead className="text-right">Action</TableHead>
                             </TableRow>
@@ -93,6 +94,7 @@ export default function GradesPage() {
                                         <TableCell className="text-center">{claim.note_actuelle ?? '-'}/20</TableCell>
                                         <TableCell className="text-center font-medium text-accent">{claim.note_demandee ?? '-'}/20</TableCell>
                                         <TableCell className="text-center font-bold text-status-success">{claim.note_finale ?? '-'}/20</TableCell>
+                                        <TableCell className="max-w-[200px] truncate text-muted-foreground italic text-xs">{claim.objectif}</TableCell>
                                         <TableCell>{format(new Date(claim.updated_at), 'dd MMM yyyy', { locale: fr })}</TableCell>
                                         <TableCell className="text-right">
                                             <Link to={`/claims/${claim.id}`}>

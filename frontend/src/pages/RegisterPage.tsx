@@ -210,9 +210,9 @@ export default function RegisterPage() {
                                     <SelectContent>
                                         {ROLE_OPTIONS.map((option) => (
                                             <SelectItem key={option.role} value={option.role} className="cursor-pointer">
-                                                <div className="flex items-center gap-2">
+                                                <span className="flex items-center gap-2">
                                                     {ROLE_LABELS[option.role]}
-                                                </div>
+                                                </span>
                                             </SelectItem>
                                         ))}
                                     </SelectContent>

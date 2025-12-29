@@ -16,6 +16,8 @@ import UsersPage from "./pages/UsersPage";
 import TeachersPage from "./pages/TeachersPage";
 import SettingsPage from "./pages/SettingsPage";
 import SubjectsPage from "./pages/SubjectsPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +32,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/claims" element={<ClaimsListPage />} />
             <Route path="/claims/new" element={<NewClaimPage />} />

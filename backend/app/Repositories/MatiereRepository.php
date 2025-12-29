@@ -25,6 +25,13 @@ class MatiereRepository implements MatiereRepositoryInterface
             ->get();
     }
 
+    public function getByEnseignant(int $enseignantId): Collection
+    {
+        return Matiere::with(['filiere', 'enseignant'])
+            ->where('enseignant_id', $enseignantId)
+            ->get();
+    }
+
     public function create(array $data): Matiere
     {
         return Matiere::create($data);
