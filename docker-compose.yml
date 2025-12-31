@@ -17,6 +17,9 @@ services:
       - ./backend:/var/www
     networks:
       - ibam-network
+    depends_on:
+      db:
+        condition: service_healthy
 
   # Nginx dedicated to Backend
   webserver:
@@ -39,16 +42,20 @@ services:
     container_name: ibam-db
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE:-ibam_db}
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-root}
-      MYSQL_USER: ${DB_USERNAME:-ibam_user}
+      MYSQL_DATABASE: ibam_reclamation
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PASSWORD: root
+      MYSQL_USER: root
     ports:
       - "3307:3306"
     volumes:
       - ibam-db-data:/var/lib/mysql
     networks:
       - ibam-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
 
   # Frontend
   frontend:
