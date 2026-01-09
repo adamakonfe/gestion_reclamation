@@ -1,59 +1,111 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Backend – API de gestion des réclamations
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Ce dossier contient le backend de l’application de gestion des réclamations, développé avec **Laravel 12** (PHP 8.2) et une base de données **MySQL 8**.
 
-## About Laravel
+L’API est consommée par le frontend React (Vite) situé dans le dossier `../frontend`.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Stack technique
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Langage** : PHP >= 8.2
+- **Framework** : Laravel 12
+- **Base de données** : MySQL 8
+- **Gestion des dépendances** : Composer
+- **Serveur HTTP** : PHP built-in (`php artisan serve`) ou **Nginx** via Docker
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Prérequis
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Sans Docker :
 
-## Laravel Sponsors
+- PHP 8.2+
+- Composer
+- MySQL (ou MariaDB compatible)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Avec Docker (via le `docker-compose.yml` à la racine) :
 
-### Premium Partners
+- Docker
+- Docker Compose
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+---
 
-## Contributing
+## Installation (sans Docker)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Depuis le dossier `backend/` :
 
-## Code of Conduct
+```bash
+composer install
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+cp .env.example .env
 
-## Security Vulnerabilities
+# Configurer la base de données dans .env
+php artisan key:generate
+php artisan migrate
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Pour lancer le serveur de développement :
 
-## License
+```bash
+php artisan serve
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+L’API sera disponible par défaut sur `http://localhost:8000`.
+
+---
+
+## Utilisation avec Docker
+
+Depuis la racine du projet (où se trouve `docker-compose.yml`) :
+
+```bash
+docker-compose up -d --build
+```
+
+Les services suivants seront démarrés :
+
+- `app` : application Laravel (backend)
+- `webserver` : Nginx exposé sur `http://localhost:8000`
+- `db` : MySQL 8 exposé sur le port `3307`
+
+Les migrations peuvent ensuite être lancées dans le conteneur `app` si nécessaire.
+
+---
+
+## Tests
+
+Pour exécuter la suite de tests :
+
+```bash
+php artisan test
+```
+
+ou via PHPUnit :
+
+```bash
+./vendor/bin/phpunit
+```
+
+---
+
+## Structure principale du backend
+
+- `app/` : code applicatif Laravel (HTTP, Models, Services, etc.)
+- `config/` : configuration de l’application
+- `database/` : migrations, seeders et factories
+- `routes/` : définition des routes API / web
+- `tests/` : tests automatisés
+
+---
+
+## Configuration
+
+La configuration principale se fait dans le fichier `.env` :
+
+- connexion à la base de données
+- configuration de l’URL de l’application (`APP_URL`)
+- autres paramètres spécifiques au projet (authentification, filesystems, etc.)
+
+Pense à adapter ces valeurs selon ton environnement (local, staging, production).
+
