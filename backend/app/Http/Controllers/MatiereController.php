@@ -66,14 +66,14 @@ class MatiereController extends Controller
     public function update(Request $request, Matiere $matiere)
     {
         $request->validate([
-            'nom' => 'required|string|max:255',
-            'code' => 'required|string|max:10|unique:matieres,code,' . $matiere->id,
+            'name' => 'required|string|max:255',
             'filiere_id' => 'required|exists:filieres,id',
+            'enseignant_id' => 'nullable|exists:users,id',
         ]);
 
         $matiere->update($request->all());
 
-        return response()->json($matiere);
+        return response()->json($matiere->load(['filiere', 'enseignant']));
     }
 
     /**

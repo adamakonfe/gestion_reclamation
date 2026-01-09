@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Role;
+use App\Mail\UserCredentialsMail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -37,6 +39,14 @@ class UserController extends Controller
             'role_id' => $request->role_id,
             'filiere_id' => $request->filiere_id,
         ]);
+        
+        // Envoi des identifiants par mail
+        try {
+            Mail::to($user->email)->send(new UserCredentialsMail($user->name, $user->email, $request->password));
+        } catch (\Exception $e) {
+            // Log error but don't stop the process
+            \Illuminate\Support\Facades\Log::error("Erreur d'envoi de mail à {$user->email}: " . $e->getMessage());
+        }
 
         return response()->json($user->load('role', 'filiere'), 201);
     }

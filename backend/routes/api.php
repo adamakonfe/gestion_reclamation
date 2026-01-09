@@ -30,6 +30,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('matieres', MatiereController::class);
 
+    // Teachers Management
+    Route::get('teachers', [\App\Http\Controllers\TeachersController::class, 'index']);
+    Route::post('teachers', [\App\Http\Controllers\TeachersController::class, 'store']);
+    Route::post('teachers/{id}/assign-matiere', [\App\Http\Controllers\TeachersController::class, 'assignMatiere']);
+    Route::post('teachers/{id}/unassign-matiere', [\App\Http\Controllers\TeachersController::class, 'unassignMatiere']);
+
     // Users & Notifications
     Route::get('users', [\App\Http\Controllers\UserController::class, 'index']);
     Route::post('users', [\App\Http\Controllers\UserController::class, 'store']);

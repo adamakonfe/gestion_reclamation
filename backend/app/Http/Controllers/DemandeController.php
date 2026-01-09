@@ -58,8 +58,8 @@ class DemandeController extends Controller
             'objet' => 'required|string',
             'objectif' => 'required|string',
             'motif' => 'required|string',
-            'note_actuelle' => 'nullable|numeric',
-            'note_demandee' => 'nullable|numeric',
+            'note_actuelle' => 'nullable|numeric|min:0|max:20',
+            'note_demandee' => 'nullable|numeric|min:0|max:20',
             'justification' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
