@@ -20,6 +20,7 @@ export default function NewClaimPage() {
     nom_prenom: user?.name || '',
     filiere_niveau: user?.filiere ? `${user.filiere.nom} - ${user.filiere.niveau}` : '',
     matiere_id: '',
+    enseignant_id: '',
     enseignant_nom: '',
     objet: '',
     objectif: '',
@@ -30,6 +31,22 @@ export default function NewClaimPage() {
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [matieres, setMatieres] = useState<any[]>([]);
+
+  const visibleMatieres = user?.filiere
+    ? matieres.filter((m) => {
+        const filiere = m?.filiere;
+        const filiereId = filiere?.id?.toString?.() ?? filiere?.id?.toString?.();
+        const userFiliereId = user.filiere?.id;
+        if (filiereId && userFiliereId && filiereId === userFiliereId) return true;
+
+        const filiereName = (filiere?.name || filiere?.nom || '').toString().trim();
+        const userFiliereName = (user.filiere?.nom || '').toString().trim();
+        const filiereNiveau = (filiere?.niveau || '').toString().trim();
+        const userFiliereNiveau = (user.filiere?.niveau || '').toString().trim();
+
+        return !!filiereName && !!userFiliereName && filiereName === userFiliereName && filiereNiveau === userFiliereNiveau;
+      })
+    : matieres;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,11 +60,39 @@ export default function NewClaimPage() {
     fetchData();
   }, []);
 
+  const handleMatiereChange = (value: string) => {
+    const selected = visibleMatieres.find((m) => m.id?.toString() === value);
+    const enseignant = selected?.enseignant;
+
+    setFormData((prev) => ({
+      ...prev,
+      matiere_id: value,
+      enseignant_id: enseignant?.id ? enseignant.id.toString() : '',
+      enseignant_nom: enseignant?.name || '',
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.filiere_niveau || !formData.matiere_id || !formData.objet || !formData.motif) {
       toast.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    const selectedMatiere = visibleMatieres.find((m) => m.id?.toString() === formData.matiere_id);
+    if (selectedMatiere && !selectedMatiere.enseignant) {
+      toast.error("Aucun enseignant n'est assigné à cette matière. Veuillez contacter l'administration.");
+      return;
+    }
+
+    const noteActuelle = formData.note_actuelle === '' ? null : Number(formData.note_actuelle);
+    const noteDemandee = formData.note_demandee === '' ? null : Number(formData.note_demandee);
+    if (
+      (noteActuelle !== null && (Number.isNaN(noteActuelle) || noteActuelle < 0 || noteActuelle > 20)) ||
+      (noteDemandee !== null && (Number.isNaN(noteDemandee) || noteDemandee < 0 || noteDemandee > 20))
+    ) {
+      toast.error('Les notes doivent être comprises entre 0 et 20');
       return;
     }
 
@@ -162,13 +207,13 @@ export default function NewClaimPage() {
                 </Label>
                 <Select
                   value={formData.matiere_id}
-                  onValueChange={(value) => setFormData({ ...formData, matiere_id: value })}
+                  onValueChange={handleMatiereChange}
                 >
                   <SelectTrigger className="bg-background">
                     <SelectValue placeholder="Sélectionnez la matière" />
                   </SelectTrigger>
                   <SelectContent>
-                    {matieres.map((s) => (
+                    {visibleMatieres.map((s) => (
                       <SelectItem key={s.id} value={s.id.toString()}>
                         {s.name || s.nom}
                       </SelectItem>
@@ -179,17 +224,38 @@ export default function NewClaimPage() {
 
               <div>
                 <Label htmlFor="enseignant_nom" className="form-label">
-                  Enseignant responsable <span className="text-muted-foreground text-[10px] ml-2">(Saisissez le nom si vous le connaissez)</span>
+                  Enseignant responsable
                 </Label>
-                <div className="relative">
-                  <Input
-                    id="enseignant_nom"
-                    value={formData.enseignant_nom}
-                    onChange={(e) => setFormData({ ...formData, enseignant_nom: e.target.value })}
-                    placeholder="Ex: Dr. Ibrahim Koné"
-                    className="bg-background"
-                  />
-                </div>
+                <Select
+                  value={formData.enseignant_id}
+                  onValueChange={(value) => {
+                    const selectedMatiere = visibleMatieres.find((m) => m.id?.toString() === formData.matiere_id);
+                    const enseignant = selectedMatiere?.enseignant;
+                    if (enseignant && enseignant.id?.toString() === value) {
+                      setFormData((prev) => ({
+                        ...prev,
+                        enseignant_id: value,
+                        enseignant_nom: enseignant.name || '',
+                      }));
+                    }
+                  }}
+                  disabled={!formData.matiere_id || !visibleMatieres.find((m) => m.id?.toString() === formData.matiere_id)?.enseignant}
+                >
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder={formData.matiere_id ? "Enseignant assigné" : "Sélectionnez d'abord la matière"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(() => {
+                      const selectedMatiere = visibleMatieres.find((m) => m.id?.toString() === formData.matiere_id);
+                      const enseignant = selectedMatiere?.enseignant;
+                      return enseignant ? (
+                        <SelectItem key={enseignant.id} value={enseignant.id.toString()}>
+                          {enseignant.name}
+                        </SelectItem>
+                      ) : null;
+                    })()}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -204,7 +270,20 @@ export default function NewClaimPage() {
                     max="20"
                     step="0.5"
                     value={formData.note_actuelle}
-                    onChange={(e) => setFormData({ ...formData, note_actuelle: e.target.value })}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      if (raw === '') {
+                        setFormData({ ...formData, note_actuelle: '' });
+                        return;
+                      }
+                      const n = Number(raw);
+                      if (Number.isNaN(n)) return;
+                      const clamped = Math.min(20, Math.max(0, n));
+                      if (clamped !== n) {
+                        toast.error('La note ne doit pas être supérieure à 20');
+                      }
+                      setFormData({ ...formData, note_actuelle: clamped.toString() });
+                    }}
                     placeholder="Ex: 12"
                     className="bg-background"
                   />
@@ -224,7 +303,20 @@ export default function NewClaimPage() {
                     max="20"
                     step="0.5"
                     value={formData.note_demandee}
-                    onChange={(e) => setFormData({ ...formData, note_demandee: e.target.value })}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      if (raw === '') {
+                        setFormData({ ...formData, note_demandee: '' });
+                        return;
+                      }
+                      const n = Number(raw);
+                      if (Number.isNaN(n)) return;
+                      const clamped = Math.min(20, Math.max(0, n));
+                      if (clamped !== n) {
+                        toast.error('La note ne doit pas être supérieure à 20');
+                      }
+                      setFormData({ ...formData, note_demandee: clamped.toString() });
+                    }}
                     placeholder="Ex: 15"
                     className="bg-background"
                   />

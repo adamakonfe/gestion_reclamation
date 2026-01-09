@@ -14,7 +14,6 @@ import NotificationsPage from "./pages/NotificationsPage";
 import GradesPage from "./pages/GradesPage";
 import UsersPage from "./pages/UsersPage";
 import TeachersPage from "./pages/TeachersPage";
-import SettingsPage from "./pages/SettingsPage";
 import SubjectsPage from "./pages/SubjectsPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
@@ -28,7 +27,7 @@ const App = () => (
       <AuthProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
             <Route path="/" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -42,7 +41,6 @@ const App = () => (
             <Route path="/grades" element={<GradesPage />} />
             <Route path="/users" element={<UsersPage />} />
             <Route path="/teachers" element={<TeachersPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
             <Route path="/subjects" element={<SubjectsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

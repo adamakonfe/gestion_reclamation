@@ -72,8 +72,14 @@ export default function RegisterPage() {
                 setFilieres(data);
 
                 // Extract unique names and unique levels
-                const names = Array.from(new Set(data.map(f => f.nom || (f as any).name))).filter(Boolean);
-                const levels = Array.from(new Set(data.map(f => f.niveau))).filter(Boolean);
+                const getFiliereName = (f: any) => f.nom || f.name || '';
+                const names = Array.from(new Set(
+                    data.map(getFiliereName).filter(Boolean).map(n => n.trim())
+                )).sort();
+
+                const levels = Array.from(new Set(
+                    data.map(f => f.niveau).filter(Boolean)
+                )).sort();
 
                 setAvailableFiliereNames(names);
                 setAvailableNiveaux(levels);
@@ -294,10 +300,10 @@ export default function RegisterPage() {
                             </div>
                         </div>
                     </div>
-                    <p className="text-[10px] text-muted-foreground bg-muted/30 p-2 rounded-lg border border-dashed flex items-center gap-2">
+                    <div className="text-[10px] text-muted-foreground bg-muted/30 p-2 rounded-lg border border-dashed flex items-center gap-2">
                         <div className="w-1 h-1 rounded-full bg-accent" />
                         Mot de passe : 8 caractères minimum.
-                    </p>
+                    </div>
 
                     <Button
                         type="submit"

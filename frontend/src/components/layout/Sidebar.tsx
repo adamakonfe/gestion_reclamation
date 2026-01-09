@@ -46,8 +46,8 @@ const navItemsByRole = {
     { label: 'Toutes les réclamations', href: '/claims', icon: FileText },
     { label: 'Gestion utilisateurs', href: '/users', icon: Users },
     { label: 'Enseignants', href: '/teachers', icon: UserCog },
+    { label: 'Matières', href: '/subjects', icon: BookOpen },
     { label: 'Notifications', href: '/notifications', icon: Bell },
-    { label: 'Paramètres', href: '/settings', icon: Settings },
   ],
 };
 
