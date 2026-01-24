@@ -136,6 +136,17 @@ npm run dev
 
 ---
 
+## 🧪 Tests
+
+Pour exécuter la suite de tests automatisés du backend :
+
+```bash
+cd backend
+php artisan test
+```
+
+---
+
 ## 📧 Configuration des Emails
 
 Pour activer les notifications (création de compte, mises à jour), configurez le SMTP dans `backend/.env`.
