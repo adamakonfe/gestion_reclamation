@@ -150,7 +150,7 @@ export default function RegisterPage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
             {/* Register Form */}
-            <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 my-8 overflow-y-auto max-h-[95vh]">
+            <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 my-8 overflow-y-auto max-h-[95vh] border-2 border-accent">
                 <div className="text-center mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <h2 className="text-3xl font-bold text-foreground mb-2">Inscription</h2>
                     <p className="text-muted-foreground">Créez votre accès IBAM</p>

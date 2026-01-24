@@ -60,7 +60,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
 
       {/* Login Form */}
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border-2 border-accent">
         <div className="text-center mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="lg:hidden flex items-center justify-center gap-3 mb-6">
             <div className="w-12 h-12 rounded-xl bg-gradient-accent flex items-center justify-center">
@@ -158,7 +158,7 @@ export default function LoginPage() {
           </p>
           <div className="pt-4 border-t border-border/50">
             <p className="text-xs">
-              Besoin d'aide ? <a href="#" className="text-accent hover:underline">Support technique</a>
+              Besoin d'aide ? <Link to="/faq" className="text-accent hover:underline">FAQ</Link>
             </p>
           </div>
         </div>

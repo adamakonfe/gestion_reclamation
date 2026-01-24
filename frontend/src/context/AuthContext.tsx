@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     role: backendUser.role.name as UserRole,
     filiere: backendUser.filiere ? {
       id: backendUser.filiere.id.toString(),
-      nom: backendUser.filiere.name || backendUser.filiere.nom,
+      name: backendUser.filiere.name || backendUser.filiere.nom, // Fix TS lint: use 'name' to match type, fallback to 'nom'
       niveau: backendUser.filiere.niveau,
     } : undefined,
   });
@@ -64,7 +64,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Note: We don't strictly need to send 'role' to login if the backend just checks email/pass
       // But we can verify if the user has the expected role if we want.
       // For now, standard login.
-      const response = await api.post('/login', { email, password });
+      const response = await api.post('/login', {
+        email,
+        password,
+        role_name: role
+      });
 
       const { token, user: backendUser } = response.data;
       localStorage.setItem('token', token);

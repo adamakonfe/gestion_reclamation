@@ -73,12 +73,32 @@ class DemandeController extends Controller
 
         $demande = $this->demandeRepository->create($data);
 
+        try {
+            \Illuminate\Support\Facades\Mail::to($request->user())->send(new \App\Mail\ClaimSubmitted($demande));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to send claim confirmation email: ' . $e->getMessage());
+        }
+
         HistoriqueAction::create([
             'demande_id' => $demande->id,
             'user_id' => $request->user()->id,
             'action' => 'Création de la demande',
             'details' => 'Demande soumise',
         ]);
+
+        // Notifier la scolarité (Global notification for all registrars)
+        $registrarRole = \App\Models\Role::where('name', 'registrar')->first();
+        if ($registrarRole) {
+            $registrars = \App\Models\User::where('role_id', $registrarRole->id)->get();
+            foreach ($registrars as $registrar) {
+                Notification::create([
+                    'user_id' => $registrar->id,
+                    'message' => 'Nouvelle réclamation soumise par ' . $request->user()->name,
+                    'type' => 'new_claim',
+                    'demande_id' => $demande->id,
+                ]);
+            }
+        }
 
         return response()->json($demande->load(['user', 'matiere', 'enseignant']), 201);
     }
@@ -135,11 +155,12 @@ class DemandeController extends Controller
             ]);
             $demande->update(['commentaire_scolarite' => $request->input('commentaire')]);
             Notification::create([
-                'user_id' => $demande->user_id,
-                'message' => 'Votre demande a été reçue par la scolarité.',
                 'type' => 'status_update',
                 'demande_id' => $demande->id,
             ]);
+            try {
+                \Illuminate\Support\Facades\Mail::to($demande->user)->send(new \App\Mail\ClaimStatusUpdated($demande));
+            } catch (\Exception $e) { \Illuminate\Support\Facades\Log::error('Mail error: ' . $e->getMessage()); }
         } elseif ($role === 'teacher' && $demande->statut === 'IMPUTEE_ENSEIGNANT') {
             $demande->update(['statut' => 'VALIDEE']);
             HistoriqueAction::create([
@@ -150,11 +171,12 @@ class DemandeController extends Controller
             ]);
             $demande->update(['commentaire_enseignant' => $request->input('commentaire')]);
             Notification::create([
-                'user_id' => $demande->user_id,
-                'message' => 'Votre demande a été validée par l\'enseignant.',
                 'type' => 'status_update',
                 'demande_id' => $demande->id,
             ]);
+            try {
+                \Illuminate\Support\Facades\Mail::to($demande->user)->send(new \App\Mail\ClaimStatusUpdated($demande));
+            } catch (\Exception $e) { \Illuminate\Support\Facades\Log::error('Mail error: ' . $e->getMessage()); }
         }
 
         return response()->json($demande);
@@ -174,6 +196,9 @@ class DemandeController extends Controller
                 'details' => $request->input('commentaire', 'Demande transférée au Directeur Académique'),
             ]);
             $demande->update(['commentaire_scolarite' => $request->input('commentaire')]);
+            try {
+                \Illuminate\Support\Facades\Mail::to($demande->user)->send(new \App\Mail\ClaimStatusUpdated($demande));
+            } catch (\Exception $e) { \Illuminate\Support\Facades\Log::error('Mail error: ' . $e->getMessage()); }
             return response()->json($demande);
         }
 
@@ -204,6 +229,10 @@ class DemandeController extends Controller
         } elseif ($role === 'teacher') {
             $demande->update(['commentaire_enseignant' => $request->input('commentaire')]);
         }
+        
+        try {
+            \Illuminate\Support\Facades\Mail::to($demande->user)->send(new \App\Mail\ClaimStatusUpdated($demande));
+        } catch (\Exception $e) { \Illuminate\Support\Facades\Log::error('Mail error: ' . $e->getMessage()); }
 
         return response()->json($demande);
     }
@@ -231,6 +260,10 @@ class DemandeController extends Controller
                 'type' => 'assignment',
                 'demande_id' => $demande->id,
             ]);
+            try {
+                 // Notify student as well
+                \Illuminate\Support\Facades\Mail::to($demande->user)->send(new \App\Mail\ClaimStatusUpdated($demande));
+            } catch (\Exception $e) { \Illuminate\Support\Facades\Log::error('Mail error: ' . $e->getMessage()); }
         }
 
         return response()->json($demande);
@@ -255,11 +288,12 @@ class DemandeController extends Controller
                 'details' => 'Note corrigée à ' . $request->nouvelle_note . '. ' . $request->input('commentaire'),
             ]);
             Notification::create([
-                'user_id' => $demande->user_id,
-                'message' => 'Votre note a été corrigée par l\'enseignant.',
                 'type' => 'status_update',
                 'demande_id' => $demande->id,
             ]);
+            try {
+                \Illuminate\Support\Facades\Mail::to($demande->user)->send(new \App\Mail\ClaimStatusUpdated($demande));
+            } catch (\Exception $e) { \Illuminate\Support\Facades\Log::error('Mail error: ' . $e->getMessage()); }
         }
 
         return response()->json($demande);

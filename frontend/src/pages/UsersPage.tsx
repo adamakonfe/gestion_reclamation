@@ -14,6 +14,7 @@ import api from '@/lib/axios';
 export default function UsersPage() {
     const [usersList, setUsersList] = useState<any[]>([]);
     const [roles, setRoles] = useState<any[]>([]);
+    const [filieres, setFilieres] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
@@ -23,7 +24,11 @@ export default function UsersPage() {
         email: '',
         password: 'password',
         role_id: '',
+        filiere_id: '',
     });
+
+    // État temporaire pour la sélection UX (Filière Name -> Niveau)
+    const [selectedFiliereName, setSelectedFiliereName] = useState<string>('');
 
     const fetchUsers = async () => {
         try {
@@ -46,15 +51,37 @@ export default function UsersPage() {
         }
     };
 
+    const fetchFilieres = async () => {
+        try {
+            const response = await api.get('/filieres');
+            setFilieres(response.data);
+        } catch (error) {
+            console.error('Failed to fetch filieres', error);
+        }
+    };
+
     useEffect(() => {
         fetchUsers();
         fetchRoles();
+        fetchFilieres();
     }, []);
+
+    // Dériver les noms uniques de filières pour le premier dropdown
+    const uniqueFiliereNames = Array.from(new Set(filieres.map(f => f.name)));
+
+    // Filtrer les niveaux disponibles pour la filière sélectionnée
+    const availableNiveaux = filieres.filter(f => f.name === selectedFiliereName);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.name || !formData.email || !formData.role_id) {
-            toast.error('Veuillez remplir tous les champs');
+            toast.error('Veuillez remplir tous les champs obligatoires');
+            return;
+        }
+
+        const selectedRole = roles.find(r => r.id.toString() === formData.role_id);
+        if (selectedRole?.name === 'student' && !formData.filiere_id) {
+            toast.error('Veuillez sélectionner une filière et un niveau pour l\'étudiant');
             return;
         }
 
@@ -63,7 +90,8 @@ export default function UsersPage() {
             await api.post('/users', formData);
             toast.success('Utilisateur créé avec succès');
             setIsOpen(false);
-            setFormData({ name: '', email: '', password: 'password', role_id: '' });
+            setFormData({ name: '', email: '', password: 'password', role_id: '', filiere_id: '' });
+            setSelectedFiliereName('');
             fetchUsers();
         } catch (error: any) {
             console.error('Failed to create user', error);
@@ -94,6 +122,11 @@ export default function UsersPage() {
             case 'student': return <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-200">Étudiant</Badge>;
             default: return <Badge variant="outline">{roleName}</Badge>;
         }
+    };
+
+    const isStudentRoleSelected = () => {
+        const selectedRole = roles.find(r => r.id.toString() === formData.role_id);
+        return selectedRole?.name === 'student';
     };
 
     return (
@@ -140,7 +173,10 @@ export default function UsersPage() {
                                     <Label htmlFor="role">Rôle</Label>
                                     <Select
                                         value={formData.role_id}
-                                        onValueChange={(val) => setFormData({ ...formData, role_id: val })}
+                                        onValueChange={(val) => {
+                                            setFormData({ ...formData, role_id: val, filiere_id: '' });
+                                            setSelectedFiliereName('');
+                                        }}
                                     >
                                         <SelectTrigger>
                                             <SelectValue placeholder="Choisir un rôle" />
@@ -156,6 +192,52 @@ export default function UsersPage() {
                                         </SelectContent>
                                     </Select>
                                 </div>
+
+                                {isStudentRoleSelected() && (
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="filiere">Filière</Label>
+                                            <Select
+                                                value={selectedFiliereName}
+                                                onValueChange={(val) => {
+                                                    setSelectedFiliereName(val);
+                                                    setFormData(prev => ({ ...prev, filiere_id: '' })); // Reset niveau when filiere changes
+                                                }}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Choisir..." />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {uniqueFiliereNames.map((name) => (
+                                                        <SelectItem key={name} value={name}>
+                                                            {name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="niveau">Niveau</Label>
+                                            <Select
+                                                value={formData.filiere_id}
+                                                onValueChange={(val) => setFormData({ ...formData, filiere_id: val })}
+                                                disabled={!selectedFiliereName}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Niveau" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {availableNiveaux.map((filiere) => (
+                                                        <SelectItem key={filiere.id} value={filiere.id.toString()}>
+                                                            {filiere.niveau}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                )}
+
                                 <div className="space-y-2">
                                     <Label htmlFor="password">Mot de passe temporaire</Label>
                                     <Input
@@ -209,7 +291,14 @@ export default function UsersPage() {
                                                 <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
                                                     <User className="w-4 h-4 text-muted-foreground" />
                                                 </div>
-                                                {userItem.name}
+                                                <div>
+                                                    <div>{userItem.name}</div>
+                                                    {userItem.filiere && (
+                                                        <div className="text-xs text-muted-foreground">
+                                                            {userItem.filiere.name} - {userItem.filiere.niveau}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         </TableCell>
                                         <TableCell>{getRoleBadge(userItem.role?.name)}</TableCell>

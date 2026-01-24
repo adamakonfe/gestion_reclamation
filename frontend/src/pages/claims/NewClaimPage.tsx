@@ -18,7 +18,7 @@ export default function NewClaimPage() {
 
   const [formData, setFormData] = useState({
     nom_prenom: user?.name || '',
-    filiere_niveau: user?.filiere ? `${user.filiere.nom} - ${user.filiere.niveau}` : '',
+    filiere_niveau: user?.filiere ? `${user.filiere.name || user.filiere.nom} - ${user.filiere.niveau}` : '',
     matiere_id: '',
     enseignant_id: '',
     enseignant_nom: '',
@@ -34,18 +34,18 @@ export default function NewClaimPage() {
 
   const visibleMatieres = user?.filiere
     ? matieres.filter((m) => {
-        const filiere = m?.filiere;
-        const filiereId = filiere?.id?.toString?.() ?? filiere?.id?.toString?.();
-        const userFiliereId = user.filiere?.id;
-        if (filiereId && userFiliereId && filiereId === userFiliereId) return true;
+      const filiere = m?.filiere;
+      const filiereId = filiere?.id?.toString?.() ?? filiere?.id?.toString?.();
+      const userFiliereId = user.filiere?.id;
+      if (filiereId && userFiliereId && filiereId === userFiliereId) return true;
 
-        const filiereName = (filiere?.name || filiere?.nom || '').toString().trim();
-        const userFiliereName = (user.filiere?.nom || '').toString().trim();
-        const filiereNiveau = (filiere?.niveau || '').toString().trim();
-        const userFiliereNiveau = (user.filiere?.niveau || '').toString().trim();
+      const filiereName = (filiere?.name || filiere?.nom || '').toString().trim();
+      const userFiliereName = (user.filiere?.nom || '').toString().trim();
+      const filiereNiveau = (filiere?.niveau || '').toString().trim();
+      const userFiliereNiveau = (user.filiere?.niveau || '').toString().trim();
 
-        return !!filiereName && !!userFiliereName && filiereName === userFiliereName && filiereNiveau === userFiliereNiveau;
-      })
+      return !!filiereName && !!userFiliereName && filiereName === userFiliereName && filiereNiveau === userFiliereNiveau;
+    })
     : matieres;
 
   useEffect(() => {

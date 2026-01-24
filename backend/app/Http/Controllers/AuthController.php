@@ -31,6 +31,13 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        try {
+            \Illuminate\Support\Facades\Mail::to($user)->send(new \App\Mail\AccountCreated($user));
+        } catch (\Exception $e) {
+            // Log email error but don't fail registration
+            \Illuminate\Support\Facades\Log::error('Failed to send welcome email: ' . $e->getMessage());
+        }
+
         return response()->json([
             'user' => $user->load('role', 'filiere'),
             'token' => $token,
@@ -42,15 +49,24 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string',
+            'role_name' => 'required|string|exists:roles,name',
         ]);
 
         if (!Auth::attempt($request->only('email', 'password'))) {
             throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
+                'email' => ['Identifiants incorrects ou rôle invalide'],
             ]);
         }
 
         $user = Auth::user();
+
+        // Vérifier si le rôle choisi correspond au rôle réel de l'utilisateur
+        if ($user->role->name !== $request->role_name) {
+            throw ValidationException::withMessages([
+                'email' => ['Identifiants incorrects ou rôle invalide'],
+            ]);
+        }
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
