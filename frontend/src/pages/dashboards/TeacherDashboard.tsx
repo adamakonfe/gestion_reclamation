@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/axios';
 
+// Dashboard Enseignant : Gestion des réclamations assignées
 export default function TeacherDashboard() {
   const { user } = useAuth();
   const [claims, setClaims] = useState<any[]>([]);
@@ -28,6 +29,7 @@ export default function TeacherDashboard() {
   }, []);
 
   const assignedClaims = claims;
+  // Extraction des matières uniques enseignées
   const mySubjects = Array.from(new Set(assignedClaims.map(c => c.matiere_id))).map(id => {
     const claim = assignedClaims.find(c => c.matiere_id === id);
     return { id, nom: claim?.matiere?.nom || 'Matière', code: claim?.matiere?.code || '' };

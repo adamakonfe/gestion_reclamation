@@ -5,6 +5,7 @@ import TeacherDashboard from './dashboards/TeacherDashboard';
 import AdminDashboard from './dashboards/AdminDashboard';
 import { Navigate } from 'react-router-dom';
 
+// Composant Dispatcher qui redirige vers le bon dashboard selon le rôle de l'utilisateur
 export default function Dashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
 

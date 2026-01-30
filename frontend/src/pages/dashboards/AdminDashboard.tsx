@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/axios';
 
+// Dashboard Admin : Vue d'ensemble et statistiques
 export default function AdminDashboard() {
   const [claims, setClaims] = useState<any[]>([]);
   const [teachers, setTeachers] = useState<any[]>([]);
@@ -30,6 +31,7 @@ export default function AdminDashboard() {
     fetchData();
   }, []);
 
+  // Filtrage et Statistiques
   const allClaims = claims;
   const pendingAssignment = allClaims.filter(c => c.statut === 'ENVOYEE_DA');
   const inProgress = allClaims.filter(c => ['SOUMISE', 'RECUE_SCOLARITE', 'ENVOYEE_DA', 'IMPUTEE_ENSEIGNANT'].includes(c.statut));

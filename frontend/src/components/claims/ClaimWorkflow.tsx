@@ -14,12 +14,13 @@ const WORKFLOW_STEPS: ClaimStatus[] = [
   'VALIDEE',
 ];
 
-const REJECTED_STATUSES: ClaimStatus[] = ['REJETEE_SCOLARITE', 'NON_VALIDEE'];
+const REJECTED_STATUSES: ClaimStatus[] = ['REJETEE_SCOLARITE', 'NON_VALIDEE', 'REJETEE_DA'];
 
+// Composant visuel de suivi de l'état d'avancement
 export function ClaimWorkflow({ currentStatus }: ClaimWorkflowProps) {
   const isRejected = REJECTED_STATUSES.includes(currentStatus);
   const currentIndex = WORKFLOW_STEPS.indexOf(currentStatus);
-  
+
   if (isRejected) {
     return (
       <div className="bg-status-error-bg border border-status-error/30 rounded-xl p-5">
@@ -29,7 +30,9 @@ export function ClaimWorkflow({ currentStatus }: ClaimWorkflowProps) {
           </div>
           <div>
             <p className="font-semibold text-status-error-text">
-              Réclamation {currentStatus === 'REJETEE_SCOLARITE' ? 'rejetée par la scolarité' : 'non validée'}
+              {currentStatus === 'REJETEE_SCOLARITE' ? 'Réclamation rejetée par la scolarité' :
+                currentStatus === 'REJETEE_DA' ? 'Réclamation rejetée par le DA' :
+                  'Réclamation non validée'}
             </p>
             <p className="text-sm text-status-error-text/70">
               Veuillez consulter les commentaires pour plus de détails.
@@ -43,7 +46,7 @@ export function ClaimWorkflow({ currentStatus }: ClaimWorkflowProps) {
   return (
     <div className="bg-card border border-border rounded-xl p-6">
       <h3 className="font-semibold text-foreground mb-6">Suivi du processus</h3>
-      
+
       <div className="flex items-center justify-between">
         {WORKFLOW_STEPS.map((step, index) => {
           const isCompleted = index < currentIndex;
@@ -80,7 +83,7 @@ export function ClaimWorkflow({ currentStatus }: ClaimWorkflowProps) {
                   {config.label}
                 </p>
               </div>
-              
+
               {!isLast && (
                 <div className={cn(
                   'flex-1 h-0.5 mx-2',

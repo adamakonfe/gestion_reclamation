@@ -49,16 +49,19 @@ class User extends Authenticatable
         ];
     }
 
+    // Relation : Rôle de l'utilisateur
     public function role()
     {
         return $this->belongsTo(Role::class);
     }
 
+    // Relation : Filière (uniquement pour les étudiants)
     public function filiere()
     {
         return $this->belongsTo(Filiere::class);
     }
 
+    // Relation : Matières enseignées (uniquement pour les enseignants)
     public function matieres()
     {
         return $this->hasMany(Matiere::class, 'enseignant_id');

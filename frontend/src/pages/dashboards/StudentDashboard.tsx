@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/axios';
 
+// Dashboard Étudiant : Vue d'ensemble des réclamations
 export default function StudentDashboard() {
   const { user } = useAuth();
   const [claims, setClaims] = useState<any[]>([]);
@@ -27,6 +28,7 @@ export default function StudentDashboard() {
     fetchClaims();
   }, []);
 
+  // Filtrage des réclamations par statut
   const myClaims = claims;
   const pendingClaims = myClaims.filter(c => !['VALIDEE', 'NON_VALIDEE', 'REJETEE_SCOLARITE'].includes(c.statut));
   const resolvedClaims = myClaims.filter(c => c.statut === 'VALIDEE');

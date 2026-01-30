@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useSearchParams } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { ClaimCard } from '@/components/claims/ClaimCard';
 import { STATUS_CONFIG, ClaimStatus } from '@/types';
@@ -10,8 +11,12 @@ import { Search, Filter, PlusCircle, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '@/lib/axios';
 
+// Page de liste des réclamations avec filtrage
 export default function ClaimsListPage() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const filterParam = searchParams.get('filter'); // 'pending' | 'processed'
+
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<ClaimStatus | 'all'>('all');
   const [claims, setClaims] = useState<any[]>([]);
@@ -31,9 +36,18 @@ export default function ClaimsListPage() {
     fetchClaims();
   }, []);
 
-  // Filter claims
+  // Filtrage des réclamations
   const getFilteredClaims = () => {
     let filtered = [...claims];
+
+    // Appliquer le filtre de l'URL (pending vs processed)
+    if (filterParam === 'pending') {
+      const pendingStatuses = ['SOUMISE', 'RECUE_SCOLARITE', 'ENVOYEE_DA', 'IMPUTEE_ENSEIGNANT'];
+      filtered = filtered.filter(c => pendingStatuses.includes(c.statut));
+    } else if (filterParam === 'processed') {
+      const processedStatuses = ['VALIDEE', 'NON_VALIDEE', 'REJETEE_SCOLARITE'];
+      filtered = filtered.filter(c => processedStatuses.includes(c.statut));
+    }
 
     if (statusFilter !== 'all') {
       filtered = filtered.filter(c => c.statut === statusFilter);
@@ -44,6 +58,7 @@ export default function ClaimsListPage() {
       filtered = filtered.filter(c =>
         (c.nom_prenom || '').toLowerCase().includes(query) ||
         (c.objet || '').toLowerCase().includes(query) ||
+        (c.matiere?.name || '').toLowerCase().includes(query) ||
         (c.matiere?.nom || '').toLowerCase().includes(query)
       );
     }
@@ -52,6 +67,7 @@ export default function ClaimsListPage() {
   };
 
   const filteredClaims = getFilteredClaims();
+  // Logique d'affichage selon le rôle
   const showAddButton = user?.role === 'student';
   const showStudentColumn = user?.role !== 'student';
 

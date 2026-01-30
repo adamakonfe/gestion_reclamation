@@ -32,6 +32,7 @@ const ROLE_OPTIONS: { role: UserRole }[] = [
 ];
 
 export default function LoginPage() {
+  // Gestion de l'état du formulaire et du rôle sélectionné
   const [selectedRole, setSelectedRole] = useState<UserRole>('student');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -43,6 +44,7 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
+      // Tentative de connexion avec le rôle sélectionné
       await login(email, password, selectedRole);
       toast.success(`Bienvenue, ${ROLE_LABELS[selectedRole]}`);
       navigate('/dashboard');

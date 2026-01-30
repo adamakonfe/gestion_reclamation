@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Demande extends Model
 {
+    // Champs assignables en masse pour une demande
     protected $fillable = [
         'nom_prenom', 'filiere_niveau', 'matiere_id', 'enseignant_id', 'enseignant_nom',
         'objet', 'objectif', 'motif', 'justification', 'statut', 'user_id',
@@ -18,6 +19,7 @@ class Demande extends Model
         'statut' => 'string',
     ];
 
+    // Retourne l'URL complète du fichier de justification s'il existe
     public function getJustificationUrlAttribute()
     {
         return $this->justification ? asset('storage/' . $this->justification) : null;
@@ -28,6 +30,7 @@ class Demande extends Model
         return $this->belongsTo(User::class);
     }
 
+    // Relation : Matière concernée
     public function matiere()
     {
         return $this->belongsTo(Matiere::class);

@@ -4,8 +4,11 @@ import api from '@/lib/axios';
 
 interface AuthContextType {
   user: User | null;
+  /** Connexion de l'utilisateur */
   login: (email: string, password: string, role: UserRole) => Promise<void>;
+  /** Inscription d'un nouvel utilisateur */
   register: (email: string, password: string, name: string, role: UserRole, filiereId?: number) => Promise<void>;
+  /** Déconnexion */
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -28,6 +31,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkAuth();
   }, []);
 
+  /**
+   * Vérifie si un jeton est présent et valide l'utilisateur auprès de l'API.
+   */
   const checkAuth = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -55,15 +61,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     filiere: backendUser.filiere ? {
       id: backendUser.filiere.id.toString(),
       name: backendUser.filiere.name || backendUser.filiere.nom, // Fix TS lint: use 'name' to match type, fallback to 'nom'
+      nom: backendUser.filiere.nom || backendUser.filiere.name,
       niveau: backendUser.filiere.niveau,
     } : undefined,
   });
 
+  /**
+   * Connecte l'utilisateur et stocke le token.
+   */
   const login = async (email: string, password: string, role: UserRole) => {
     try {
-      // Note: We don't strictly need to send 'role' to login if the backend just checks email/pass
-      // But we can verify if the user has the expected role if we want.
-      // For now, standard login.
+      // Note : Nous n'avons pas strictement besoin d'envoyer le rôle pour la connexion si le backend vérifie juste email/mdp
+      // Mais cela permet de vérifier si l'utilisateur a le rôle attendu.
+      // Pour l'instant, connexion standard.
       const response = await api.post('/login', {
         email,
         password,
@@ -75,11 +85,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const user = mapBackendUserToFrontend(backendUser);
 
-      // Optional: Check if logged in user matches the selected role
+      // Optionnel : Vérifier si l'utilisateur connecté correspond au rôle sélectionné
       if (user.role !== role) {
-        // You might want to allow it anyway or throw error. 
-        // For this app, let's just warn or update the context to the real role.
-        console.warn(`User logged in as ${user.role} but selected ${role}`);
+        // On pourrait bloquer, mais pour cette app, on avertit juste.
+        console.warn(`Utilisateur connecté en tant que ${user.role} mais a choisi ${role}`);
       }
 
       setUser(user);
@@ -89,6 +98,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  /**
+   * Inscrit un nouvel utilisateur.
+   */
   const register = async (email: string, password: string, name: string, role: UserRole, filiereId?: number) => {
     try {
       const response = await api.post('/register', {
@@ -109,6 +121,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  /**
+   * Déconnecte l'utilisateur et supprime le token.
+   */
   const logout = async () => {
     try {
       await api.post('/logout');

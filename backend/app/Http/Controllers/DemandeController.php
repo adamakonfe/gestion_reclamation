@@ -18,7 +18,10 @@ class DemandeController extends Controller
         $this->demandeRepository = $demandeRepository;
     }
     /**
-     * Display a listing of the resource.
+     * Liste des demandes selon le rôle de l'utilisateur.
+     * - Étudiant : Ses propres demandes.
+     * - Enseignant : Demandes qui lui sont assignées.
+     * - Scolarité/Admin : Toutes les demandes.
      */
     public function index(Request $request)
     {
@@ -46,7 +49,7 @@ class DemandeController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Création d'une nouvelle demande (réclamation).
      */
     public function store(Request $request)
     {
@@ -104,7 +107,7 @@ class DemandeController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Affiche les détails d'une demande spécifique.
      */
     public function show(string $id)
     {
@@ -139,6 +142,11 @@ class DemandeController extends Controller
         //
     }
 
+    /**
+     * Validation d'une demande par la scolarité ou l'enseignant.
+     * - Scolarité : "Reçue".
+     * - Enseignant : "Validée".
+     */
     public function valider(Request $request, $id)
     {
         $demande = \App\Models\Demande::findOrFail($id);
@@ -155,6 +163,8 @@ class DemandeController extends Controller
             ]);
             $demande->update(['commentaire_scolarite' => $request->input('commentaire')]);
             Notification::create([
+                'user_id' => $demande->user_id,
+                'message' => 'Votre réclamation a été reçue par la scolarité.',
                 'type' => 'status_update',
                 'demande_id' => $demande->id,
             ]);
@@ -171,6 +181,8 @@ class DemandeController extends Controller
             ]);
             $demande->update(['commentaire_enseignant' => $request->input('commentaire')]);
             Notification::create([
+                'user_id' => $demande->user_id,
+                'message' => 'Votre réclamation a été validée par l\'enseignant.',
                 'type' => 'status_update',
                 'demande_id' => $demande->id,
             ]);
@@ -182,6 +194,10 @@ class DemandeController extends Controller
         return response()->json($demande);
     }
 
+    /**
+     * Transfère la demande au Directeur Académique (DA).
+     * Action réservée à la scolarité.
+     */
     public function envoyerAuDA(Request $request, $id)
     {
         $demande = \App\Models\Demande::findOrFail($id);
@@ -205,6 +221,9 @@ class DemandeController extends Controller
         return response()->json(['error' => 'Action non autorisée'], 403);
     }
 
+    /**
+     * Rejet d'une demande.
+     */
     public function rejeter(Request $request, $id)
     {
         $demande = \App\Models\Demande::findOrFail($id);
@@ -215,6 +234,8 @@ class DemandeController extends Controller
             $demande->update(['statut' => 'REJETEE_SCOLARITE']);
         } elseif ($role === 'teacher' && $demande->statut === 'IMPUTEE_ENSEIGNANT') {
             $demande->update(['statut' => 'NON_VALIDEE']);
+        } elseif ($role === 'admin' && $demande->statut === 'ENVOYEE_DA') {
+            $demande->update(['statut' => 'REJETEE_DA']);
         }
 
         HistoriqueAction::create([
@@ -224,7 +245,14 @@ class DemandeController extends Controller
             'details' => $request->input('commentaire', 'Rejetée'),
         ]);
 
-        if ($role === 'registrar') {
+        Notification::create([
+            'user_id' => $demande->user_id,
+            'message' => 'Votre réclamation a été rejetée.',
+            'type' => 'status_update',
+            'demande_id' => $demande->id,
+        ]);
+
+        if ($role === 'registrar' || $role === 'admin') {
             $demande->update(['commentaire_scolarite' => $request->input('commentaire')]);
         } elseif ($role === 'teacher') {
             $demande->update(['commentaire_enseignant' => $request->input('commentaire')]);
@@ -237,6 +265,9 @@ class DemandeController extends Controller
         return response()->json($demande);
     }
 
+    /**
+     * Imputation d'une demande à un enseignant par l'administrateur (DA).
+     */
     public function imputer(Request $request, $id)
     {
         $request->validate(['enseignant_id' => 'required|exists:users,id']);
@@ -260,6 +291,13 @@ class DemandeController extends Controller
                 'type' => 'assignment',
                 'demande_id' => $demande->id,
             ]);
+
+            Notification::create([
+                'user_id' => $demande->user_id,
+                'message' => 'Votre réclamation a été transmise à l\'enseignant pour traitement.',
+                'type' => 'status_update',
+                'demande_id' => $demande->id,
+            ]);
             try {
                  // Notify student as well
                 \Illuminate\Support\Facades\Mail::to($demande->user)->send(new \App\Mail\ClaimStatusUpdated($demande));
@@ -269,6 +307,9 @@ class DemandeController extends Controller
         return response()->json($demande);
     }
 
+    /**
+     * Correction de la note par l'enseignant.
+     */
     public function corriger(Request $request, $id)
     {
         $request->validate(['nouvelle_note' => 'required|numeric|min:0|max:20']);
@@ -288,6 +329,8 @@ class DemandeController extends Controller
                 'details' => 'Note corrigée à ' . $request->nouvelle_note . '. ' . $request->input('commentaire'),
             ]);
             Notification::create([
+                'user_id' => $demande->user_id,
+                'message' => 'Votre note a été corrigée par l\'enseignant.',
                 'type' => 'status_update',
                 'demande_id' => $demande->id,
             ]);

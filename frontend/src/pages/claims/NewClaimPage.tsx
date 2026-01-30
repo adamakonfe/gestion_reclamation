@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import api from '@/lib/axios';
 
+// Page de création d'une nouvelle réclamation
 export default function NewClaimPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -32,6 +33,7 @@ export default function NewClaimPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [matieres, setMatieres] = useState<any[]>([]);
 
+  // Filtrer les matières visibles selon la filière de l'étudiant
   const visibleMatieres = user?.filiere
     ? matieres.filter((m) => {
       const filiere = m?.filiere;
@@ -72,6 +74,7 @@ export default function NewClaimPage() {
     }));
   };
 
+  // Soumission du formulaire
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -80,6 +83,7 @@ export default function NewClaimPage() {
       return;
     }
 
+    // Vérifier si un enseignant est assigné à la matière
     const selectedMatiere = visibleMatieres.find((m) => m.id?.toString() === formData.matiere_id);
     if (selectedMatiere && !selectedMatiere.enseignant) {
       toast.error("Aucun enseignant n'est assigné à cette matière. Veuillez contacter l'administration.");
@@ -159,7 +163,7 @@ export default function NewClaimPage() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Personal Info Section */}
+          {/* Section Informations Personnelles */}
           <div className="form-section">
             <h2 className="text-lg font-semibold text-foreground mb-5">
               Informations personnelles
@@ -194,7 +198,7 @@ export default function NewClaimPage() {
             </div>
           </div>
 
-          {/* Subject Section */}
+          {/* Section Matière */}
           <div className="form-section">
             <h2 className="text-lg font-semibold text-foreground mb-5">
               Matière concernée
@@ -328,7 +332,7 @@ export default function NewClaimPage() {
             </div>
           </div>
 
-          {/* Details Section */}
+          {/* Section Détails */}
           <div className="form-section">
             <h2 className="text-lg font-semibold text-foreground mb-5">
               Détails de la réclamation

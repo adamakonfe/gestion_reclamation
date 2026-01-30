@@ -27,6 +27,7 @@ import { toast } from 'sonner';
 import { ClaimStatus } from '@/types';
 import api from '@/lib/axios';
 
+// Page de détail d'une réclamation avec gestion du workflow
 export default function ClaimDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -47,8 +48,14 @@ export default function ClaimDetailPage() {
           api.get(`/demandes/${id}`),
           api.get('/users/enseignants'),
         ]);
-        setClaim(claimRes.data);
+        const claimData = claimRes.data;
+        setClaim(claimData);
         setTeachers(teachersRes.data);
+
+        // Pré-sélectionner l'enseignant assigné à la réclamation
+        if (claimData.enseignant_id) {
+          setSelectedTeacher(claimData.enseignant_id.toString());
+        }
       } catch (error) {
         console.error('Failed to fetch data', error);
         toast.error('Impossible de charger les détails de la réclamation');
@@ -83,6 +90,7 @@ export default function ClaimDetailPage() {
     );
   }
 
+  // Gestion des actions (Validation, Rejet, Imputation...)
   const handleAction = async (action: 'validate' | 'reject' | 'send_da' | 'assign' | 'validate_note') => {
     setIsProcessing(true);
     try {
@@ -130,6 +138,7 @@ export default function ClaimDetailPage() {
     }
   };
 
+  // Vérifie si l'utilisateur peut effectuer une action sur la réclamation
   const canProcess = () => {
     switch (user?.role) {
       case 'registrar':
@@ -170,7 +179,7 @@ export default function ClaimDetailPage() {
           </div>
         </div>
 
-        {/* Workflow Progress */}
+        {/* Barre de progression du workflow */}
         <div className="mb-8">
           <ClaimWorkflow currentStatus={claim.statut} />
         </div>
@@ -350,9 +359,11 @@ export default function ClaimDetailPage() {
                           <SelectValue placeholder="Sélectionnez un enseignant" />
                         </SelectTrigger>
                         <SelectContent>
-                          {teachers.map((t) => (
-                            <SelectItem key={t.id} value={t.id.toString()}>{t.name}</SelectItem>
-                          ))}
+                          {teachers
+                            .filter(t => !claim.enseignant_id || t.id.toString() === claim.enseignant_id.toString())
+                            .map((t) => (
+                              <SelectItem key={t.id} value={t.id.toString()}>{t.name}</SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -365,14 +376,25 @@ export default function ClaimDetailPage() {
                         className="bg-background"
                       />
                     </div>
-                    <Button
-                      onClick={() => handleAction('assign')}
-                      disabled={isProcessing || !selectedTeacher}
-                      className="bg-gradient-accent hover:opacity-90 text-accent-foreground gap-2 w-full"
-                    >
-                      <UserCog className="w-4 h-4" />
-                      Imputer la réclamation
-                    </Button>
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={() => handleAction('assign')}
+                        disabled={isProcessing || !selectedTeacher}
+                        className="bg-gradient-accent hover:opacity-90 text-accent-foreground gap-2 flex-1"
+                      >
+                        <UserCog className="w-4 h-4" />
+                        Imputer la réclamation
+                      </Button>
+                      <Button
+                        onClick={() => handleAction('reject')}
+                        disabled={isProcessing}
+                        variant="destructive"
+                        className="gap-2"
+                      >
+                        <XCircle className="w-4 h-4" />
+                        Rejeter
+                      </Button>
+                    </div>
                   </div>
                 )}
 

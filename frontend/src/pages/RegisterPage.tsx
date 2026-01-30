@@ -46,13 +46,14 @@ const ROLE_OPTIONS: { role: UserRole }[] = [
 ];
 
 export default function RegisterPage() {
+    // États pour les champs du formulaire
     const [selectedRole, setSelectedRole] = useState<UserRole>('student');
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
-    // Split Filiere and Niveau
+    // Séparation Filière et Niveau pour l'UI
     const [selectedFiliereName, setSelectedFiliereName] = useState<string>('');
     const [selectedNiveau, setSelectedNiveau] = useState<string>('');
 
@@ -71,30 +72,47 @@ export default function RegisterPage() {
                 const data: Filiere[] = filieresRes.data;
                 setFilieres(data);
 
-                // Extract unique names and unique levels
-                const getFiliereName = (f: any) => f.nom || f.name || '';
+                // Extraction des noms uniques et niveaux uniques
+                const getFiliereName = (f: any) => f.name || f.nom || '';
                 const names = Array.from(new Set(
                     data.map(getFiliereName).filter(Boolean).map(n => n.trim())
                 )).sort();
 
                 const levels = Array.from(new Set(
-                    data.map(f => f.niveau).filter(Boolean)
+                    data.map(f => f.niveau).filter(Boolean).map(l => l.trim())
                 )).sort();
 
                 setAvailableFiliereNames(names);
                 setAvailableNiveaux(levels);
             } catch (error) {
                 console.error('Failed to fetch data:', error);
-                // Fallback mock if API fails
-                const mockFilieres = [
+
+                // Données de secours complètes
+                const mockFNames = [
                     'Informatique',
                     'Comptabilité Contrôle Audit',
                     'Assistanat de Direction',
                     'Marketing et Innovation Digital',
                     'Assurance Banque Finance'
                 ];
-                setAvailableFiliereNames(mockFilieres);
-                setAvailableNiveaux(['Licence 1', 'Licence 2', 'Licence 3']);
+                const mockLevels = ['Licence 1', 'Licence 2', 'Licence 3'];
+
+                const mockFilieres: Filiere[] = [];
+                let idCounter = 1;
+                mockFNames.forEach(name => {
+                    mockLevels.forEach(level => {
+                        mockFilieres.push({
+                            id: (idCounter++).toString(),
+                            name: name,
+                            nom: name,
+                            niveau: level
+                        });
+                    });
+                });
+
+                setFilieres(mockFilieres);
+                setAvailableFiliereNames(mockFNames);
+                setAvailableNiveaux(mockLevels);
             }
         };
         fetchData();
@@ -102,6 +120,7 @@ export default function RegisterPage() {
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
+        // Validation des mots de passe
         if (password !== confirmPassword) {
             toast.error("Les mots de passe ne correspondent pas");
             return;
@@ -114,17 +133,16 @@ export default function RegisterPage() {
                 return;
             }
 
-            // Find the matching filiere record
             const matchingFiliere = filieres.find(f =>
-                (f.nom === selectedFiliereName || (f as any).name === selectedFiliereName) &&
-                f.niveau === selectedNiveau
+                (f.name?.trim() === selectedFiliereName.trim() || f.nom?.trim() === selectedFiliereName.trim()) &&
+                f.niveau?.trim() === selectedNiveau.trim()
             );
 
             if (!matchingFiliere) {
                 toast.error("Combinaison filière/niveau introuvable");
                 return;
             }
-            filiereId = parseInt(matchingFiliere.id);
+            filiereId = typeof matchingFiliere.id === 'string' ? parseInt(matchingFiliere.id) : matchingFiliere.id;
         }
 
         setIsLoading(true);

@@ -13,9 +13,12 @@ import ClaimsListPage from "./pages/claims/ClaimsListPage";
 import ClaimDetailPage from "./pages/claims/ClaimDetailPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import GradesPage from "./pages/GradesPage";
+import StudentGradesPage from "./pages/StudentGradesPage";
 import UsersPage from "./pages/UsersPage";
 import TeachersPage from "./pages/TeachersPage";
 import SubjectsPage from "./pages/SubjectsPage";
+import TeacherNotes from "./pages/notes/TeacherNotes";
+import TeacherSubjectGrades from "./pages/notes/TeacherSubjectGrades";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
@@ -41,9 +44,12 @@ const App = () => (
             <Route path="/claims/:id" element={<ClaimDetailPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/grades" element={<GradesPage />} />
+            <Route path="/grades/:id" element={<StudentGradesPage />} />
             <Route path="/users" element={<UsersPage />} />
             <Route path="/teachers" element={<TeachersPage />} />
             <Route path="/subjects" element={<SubjectsPage />} />
+            <Route path="/teacher/notes" element={<TeacherNotes />} />
+            <Route path="/teacher/notes/:id" element={<TeacherSubjectGrades />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

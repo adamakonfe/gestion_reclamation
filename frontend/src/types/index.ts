@@ -1,7 +1,7 @@
-// User Roles
+// Rôles Utilisateurs
 export type UserRole = 'student' | 'registrar' | 'teacher' | 'admin';
 
-// Claim Status
+// Statut de la réclamation
 export type ClaimStatus =
   | 'SOUMISE'
   | 'RECUE_SCOLARITE'
@@ -9,9 +9,10 @@ export type ClaimStatus =
   | 'ENVOYEE_DA'
   | 'IMPUTEE_ENSEIGNANT'
   | 'VALIDEE'
-  | 'NON_VALIDEE';
+  | 'NON_VALIDEE'
+  | 'REJETEE_DA';
 
-// User Interface
+// Interface Utilisateur
 export interface User {
   id: string;
   email: string;
@@ -21,7 +22,7 @@ export interface User {
   filiere?: Filiere;
 }
 
-// Claim/Demande Interface
+// Interface Réclamation / Demande
 export interface Claim {
   id: string;
   nom_prenom: string;
@@ -54,7 +55,7 @@ export interface Claim {
   student_id: string;
 }
 
-// Subject/Matière Interface
+// Interface Matière
 export interface Subject {
   id: string;
   nom: string;
@@ -63,7 +64,7 @@ export interface Subject {
   filiere_id: string;
 }
 
-// Filière Interface
+// Interface Filière
 export interface Filiere {
   id: string;
   name: string;
@@ -71,7 +72,7 @@ export interface Filiere {
   niveau: string;
 }
 
-// Notification Interface
+// Interface Notification
 export interface Notification {
   id: string;
   user_id: string;
@@ -83,7 +84,7 @@ export interface Notification {
   created_at: string;
 }
 
-// Stats Interface
+// Interface Statistiques Dashboard
 export interface DashboardStats {
   totalClaims: number;
   pendingClaims: number;
@@ -91,7 +92,7 @@ export interface DashboardStats {
   rejectedClaims: number;
 }
 
-// Status Labels and Colors
+// Libellés et Couleurs des status
 export const STATUS_CONFIG: Record<ClaimStatus, { label: string; variant: 'pending' | 'success' | 'error' | 'info' | 'processing' }> = {
   SOUMISE: { label: 'Soumise', variant: 'info' },
   RECUE_SCOLARITE: { label: 'Reçue Scolarité', variant: 'pending' },
@@ -100,6 +101,7 @@ export const STATUS_CONFIG: Record<ClaimStatus, { label: string; variant: 'pendi
   IMPUTEE_ENSEIGNANT: { label: 'En cours de traitement', variant: 'processing' },
   VALIDEE: { label: 'Validée', variant: 'success' },
   NON_VALIDEE: { label: 'Non validée', variant: 'error' },
+  REJETEE_DA: { label: 'Rejetée par le DA', variant: 'error' },
 };
 
 export const ROLE_LABELS: Record<UserRole, string> = {

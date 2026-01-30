@@ -11,6 +11,9 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    /**
+     * Inscription d'un nouvel utilisateur.
+     */
     public function register(Request $request)
     {
         $request->validate([
@@ -44,6 +47,9 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Connexion de l'utilisateur et génération du token.
+     */
     public function login(Request $request)
     {
         $request->validate([
@@ -75,6 +81,9 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Envoi du lien de réinitialisation de mot de passe.
+     */
     public function forgotPassword(Request $request)
     {
         $request->validate(['email' => 'required|email']);
@@ -97,6 +106,9 @@ class AuthController extends Controller
         }
     }
 
+    /**
+     * Réinitialisation du mot de passe avec le token.
+     */
     public function resetPassword(Request $request)
     {
         $request->validate([
@@ -119,6 +131,9 @@ class AuthController extends Controller
             : response()->json(['message' => 'Impossible de réinitialiser le mot de passe (jeton invalide).'], 400);
     }
 
+    /**
+     * Déconnexion (révocation du token).
+     */
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
@@ -126,6 +141,9 @@ class AuthController extends Controller
         return response()->json(['message' => 'Logged out successfully']);
     }
 
+    /**
+     * Récupération des informations de l'utilisateur connecté.
+     */
     public function user(Request $request)
     {
         return response()->json($request->user()->load('role', 'filiere'));

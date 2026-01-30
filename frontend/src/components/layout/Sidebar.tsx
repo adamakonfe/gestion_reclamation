@@ -11,7 +11,8 @@ import {
   GraduationCap,
   ClipboardCheck,
   BookOpen,
-  UserCog
+  UserCog,
+  History
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ROLE_LABELS } from '@/types';
@@ -26,24 +27,29 @@ const navItemsByRole = {
   student: [
     { label: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
     { label: 'Nouvelle réclamation', href: '/claims/new', icon: PlusCircle },
-    { label: 'Mes réclamations', href: '/claims', icon: FileText },
+    { label: 'Mes réclamations', href: '/claims?filter=pending', icon: FileText },
+    { label: 'Historique', href: '/claims?filter=processed', icon: History },
     { label: 'Notifications', href: '/notifications', icon: Bell },
   ],
   registrar: [
     { label: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
-    { label: 'Réclamations', href: '/claims', icon: ClipboardCheck },
+    { label: 'Réclamations', href: '/claims?filter=pending', icon: ClipboardCheck },
+    { label: 'Historique', href: '/claims?filter=processed', icon: History },
     { label: 'Gestion des notes', href: '/grades', icon: BookOpen },
     { label: 'Notifications', href: '/notifications', icon: Bell },
   ],
   teacher: [
     { label: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
-    { label: 'Réclamations assignées', href: '/claims', icon: FileText },
+    { label: 'Réclamations assignées', href: '/claims?filter=pending', icon: FileText },
+    { label: 'Historique', href: '/claims?filter=processed', icon: History },
+    { label: 'Gestion des Notes', href: '/teacher/notes', icon: GraduationCap },
     { label: 'Mes matières', href: '/subjects', icon: BookOpen },
     { label: 'Notifications', href: '/notifications', icon: Bell },
   ],
   admin: [
     { label: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
-    { label: 'Toutes les réclamations', href: '/claims', icon: FileText },
+    { label: 'Réclamations en cours', href: '/claims?filter=pending', icon: FileText },
+    { label: 'Historique', href: '/claims?filter=processed', icon: History },
     { label: 'Gestion utilisateurs', href: '/users', icon: Users },
     { label: 'Enseignants', href: '/teachers', icon: UserCog },
     { label: 'Matières', href: '/subjects', icon: BookOpen },
@@ -77,8 +83,10 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.href ||
-            (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
+          const currentPath = location.pathname + location.search;
+          const isActive = currentPath === item.href ||
+            (item.href === '/claims' && currentPath.startsWith('/claims/')) ||
+            (item.href === '/grades' && currentPath.startsWith('/grades/'));
 
           return (
             <Link

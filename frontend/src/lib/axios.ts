@@ -9,6 +9,7 @@ const api = axios.create({
     withCredentials: false,
 });
 
+// Intercepteur pour ajouter le token d'authentification à chaque requête
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
     if (token) {

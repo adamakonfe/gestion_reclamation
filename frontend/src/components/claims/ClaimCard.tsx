@@ -7,9 +7,10 @@ import { fr } from 'date-fns/locale';
 
 interface ClaimCardProps {
   claim: Claim;
-  showStudent?: boolean;
+  showStudent?: boolean; // Afficher le nom de l'étudiant (utile pour les profs/admin)
 }
 
+// Carte affichant un résumé d'une réclamation
 export function ClaimCard({ claim, showStudent = false }: ClaimCardProps) {
   return (
     <Link

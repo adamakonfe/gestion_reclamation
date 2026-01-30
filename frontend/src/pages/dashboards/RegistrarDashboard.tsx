@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import api from '@/lib/axios';
 
+// Dashboard Scolarité : Supervision globale et dispatching
 export default function RegistrarDashboard() {
   const [claims, setClaims] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,6 +27,7 @@ export default function RegistrarDashboard() {
     fetchClaims();
   }, []);
 
+  // Catégorisation des réclamations
   const allClaims = claims;
   const newClaims = allClaims.filter(c => c.statut === 'SOUMISE');
   const inReviewClaims = allClaims.filter(c => c.statut === 'RECUE_SCOLARITE');

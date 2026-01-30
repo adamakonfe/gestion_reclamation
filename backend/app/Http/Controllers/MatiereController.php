@@ -25,7 +25,8 @@ class MatiereController extends Controller
             return response()->json($this->matiereRepository->getByEnseignant($user->id));
         }
 
-        return response()->json($this->matiereRepository->getAll());
+        // Charger les relations filiere et enseignant
+        return response()->json(Matiere::with(['filiere', 'enseignant'])->get());
     }
 
     /**

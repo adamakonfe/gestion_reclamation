@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Ajout des colonnes pour le traitement des réclamations
         Schema::table('demandes', function (Blueprint $table) {
             $table->float('note_actuelle')->nullable();
             $table->float('note_demandee')->nullable();
